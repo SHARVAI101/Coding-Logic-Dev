@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:fdottedline/fdottedline.dart';
+import 'package:logic_dev_test/basic_question_2_page.dart';
 
 class BasicQuestion1 extends StatefulWidget {
   @override
@@ -15,7 +15,7 @@ class _BasicQuestion1State extends State<BasicQuestion1> {
   var options = [["5", 0],["int", 0],[";", 0],["x", 0],["=", 0]]; // 0: Answer text, 1: 1=selected 0=not selected
 
   var currentblank = 0;
-
+  var allBlanksFilled = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,6 +87,7 @@ class _BasicQuestion1State extends State<BasicQuestion1> {
                                   if(currentblank >= 0){
                                     blanks[blanks.indexOf(thisblank)][1]=0; // not filled
                                     options[blanks[blanks.indexOf(thisblank)][2]][1] = 0; // this option is not selected
+                                    blanks[blanks.indexOf(thisblank)][2]=-1; //no option in this blank
 
                                     for(var i=0; i<blanks.length;i++){
                                       if(blanks[i][1]==0){
@@ -94,6 +95,7 @@ class _BasicQuestion1State extends State<BasicQuestion1> {
                                         break;
                                       }
                                     }
+                                    allBlanksFilled=false;
                                     setState(() {
 
                                     });
@@ -144,6 +146,7 @@ class _BasicQuestion1State extends State<BasicQuestion1> {
                               if(currentblank < blanks.length){
                                 blanks[currentblank][1]=1;
                                 blanks[currentblank][2]=options.indexOf(thisoption);
+                                var _prevblank=currentblank;
                                 for(var i=0; i<blanks.length;i++){
                                   if(blanks[i][1]==0){
                                     currentblank = i;
@@ -152,6 +155,8 @@ class _BasicQuestion1State extends State<BasicQuestion1> {
                                 }
 
                                 options[options.indexOf(thisoption)][1]=1;
+                                if(currentblank==_prevblank)
+                                  allBlanksFilled=true;
                                 setState(() {
 
                                 });
@@ -193,7 +198,7 @@ class _BasicQuestion1State extends State<BasicQuestion1> {
                   height: 50,
                   width: (MediaQuery. of(context). size. width-60)/2,
                   child: RaisedButton(
-                    onPressed: (){
+                    onPressed:  (allBlanksFilled==false)?null:(){
                       var _isCorrect = true;
                       for(var i=0; i<blanks.length;i++){
                         if(blanks[i][0]!=blanks[i][2]){
@@ -203,9 +208,46 @@ class _BasicQuestion1State extends State<BasicQuestion1> {
                       }
                       if(_isCorrect==true){
                         print("Correct Answer");
+                        return showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text(
+                              "Correct Answer",
+                              textAlign: TextAlign.center,
+                            ),
+                            // content: Text("You have raised a Alert Dialog Box"),
+                            actions: <Widget>[
+                              FlatButton(
+                                onPressed: () {
+                                  Navigator.of(ctx).pop();
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => BasicQuestion2()),
+                                  );
+                                },
+                                child: Text("Continue"),
+                              ),
+                            ],
+                          ),
+                        );
                       }
                       else{
                         print("Wrong Answer");
+                        return showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text("Wrong Answer"),
+                            content: Text("Try 'Check Theory' to understand get hints."),
+                            actions: <Widget>[
+                              FlatButton(
+                                onPressed: () {
+                                  Navigator.of(ctx).pop();
+                                },
+                                child: Text("Retry"),
+                              ),
+                            ],
+                          ),
+                        );
                       }
                     },
                     color: Colors.green,
