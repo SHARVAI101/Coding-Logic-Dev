@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fdottedline/fdottedline.dart';
 import 'package:logic_dev_test/basic_question_3_page.dart';
+import 'package:logic_dev_test/theory_pages/question_2_theory_page.dart';
 
 class BasicQuestion2 extends StatefulWidget {
   @override
@@ -20,16 +21,34 @@ class _BasicQuestion2State extends State<BasicQuestion2> {
   Widget BlankConstruct(thisblank){
     if(thisblank[1]==0){
       // if it is empty
-      return FDottedLine(
-        color: (currentblank==blanks.indexOf(thisblank))?Colors.green:Colors.black,
-        strokeWidth: 1.5,
-        dottedLength: 6.0,
-        space: 2.0,
-        corner: FDottedLineCorner.all(6.0),
-        height: 35,
-        width: 50,
-        /// add widget
-        // child:
+      return InkWell(
+        onTap: (){
+          print("clicked");
+          currentblank=blanks.indexOf(thisblank);
+          setState(() {
+
+          });
+        },
+        child: FDottedLine(
+          color: (currentblank==blanks.indexOf(thisblank))?Colors.green:Colors.black,
+          strokeWidth: 1.5,
+          dottedLength: 6.0,
+          space: 2.0,
+          corner: FDottedLineCorner.all(6.0),
+          height: 35,
+          width: 50,
+          /// add widget
+            child:(currentblank==blanks.indexOf(thisblank))? Container(
+              height: 35,
+              width: 50,
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.green[50],
+                    borderRadius: BorderRadius.all(Radius.circular(6))
+                ),
+              ),
+            ):null
+        ),
       );
     }
     else{
@@ -54,13 +73,13 @@ class _BasicQuestion2State extends State<BasicQuestion2> {
                     blanks[blanks.indexOf(thisblank)][1]=0; // not filled
                     options[blanks[blanks.indexOf(thisblank)][2]][1] = 0; // this option is not selected
                     blanks[blanks.indexOf(thisblank)][2]=-1; //no option in this blank
-
-                    for(var i=0; i<blanks.length;i++){
-                      if(blanks[i][1]==0){
-                        currentblank = i;
-                        break;
-                      }
-                    }
+                    currentblank=blanks.indexOf(thisblank);
+                    // for(var i=0; i<blanks.length;i++){
+                    //   if(blanks[i][1]==0){
+                    //     currentblank = i;
+                    //     break;
+                    //   }
+                    // }
 
                     allBlanksFilled=false;
                     setState(() {
@@ -184,12 +203,44 @@ class _BasicQuestion2State extends State<BasicQuestion2> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Choices:',
-                      style: TextStyle(
-                        fontFamily: 'FreeSans',
-                        fontSize: 20,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Choices:',
+                          style: TextStyle(
+                            fontFamily: 'FreeSans',
+                            fontSize: 20,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 30,
+                          child: RaisedButton(
+                              color: Colors.redAccent,
+                              textColor: Colors.white,
+                              padding: EdgeInsets.all(0),
+                              onPressed:(){
+                                currentblank=0;
+                                for(int i=0;i<blanks.length;i++){
+                                  blanks[i][1]=0;
+                                  blanks[i][2]=-1;
+                                }
+                                for(int i=0;i<options.length;i++){
+                                  options[i][1]=0;
+                                }
+                                setState(() {
+
+                                });
+                              },
+                              child: Text(
+                                'RESET',
+                                style: TextStyle(
+                                    fontSize: 12
+                                ),
+                              )
+                          ),
+                        )
+                      ],
                     ),
                     SizedBox(height: 20),
                     SizedBox(
@@ -200,7 +251,14 @@ class _BasicQuestion2State extends State<BasicQuestion2> {
                         children: options.map((thisoption){
                           if(thisoption[1]==1){
                             // if it has been selected
-                            return Container();
+                            // return Container();
+                            return SizedBox(height: 30,width: 90,);
+                            // return RaisedButton(
+                            //   onPressed: null,
+                            //   child: Text(
+                            //       thisoption[0]
+                            //   ),
+                            // );
                           }
                           else{
                             return RaisedButton(
@@ -208,20 +266,38 @@ class _BasicQuestion2State extends State<BasicQuestion2> {
                                 if(currentblank < blanks.length){
                                   blanks[currentblank][1]=1;
                                   blanks[currentblank][2]=options.indexOf(thisoption);
-                                  var _prevblank=currentblank;
-                                  for(var i=0; i<blanks.length;i++){
-                                    if(blanks[i][1]==0){
-                                      currentblank = i;
+                                  // var _prevblank=currentblank;
+                                  currentblank+=1;
+                                  bool _blankFoundAhead=false;
+                                  for(int i=currentblank;i<blanks.length;i++){
+                                    if(blanks[i][2]==-1){
+                                      currentblank=i;
+                                      _blankFoundAhead=true;
                                       break;
                                     }
                                   }
-                                  print(currentblank);
-                                  print(blanks.length);
+                                  if(_blankFoundAhead==false) {
+                                    for (var i = 0; i < currentblank; i++) {
+                                      if (blanks[i][1] == 0) {
+                                        currentblank = i;
+                                        break;
+                                      }
+                                    }
+                                  }
 
-                                  options[options.indexOf(thisoption)][1]=1;
+                                  options[options.indexOf(thisoption)][1]=1; //this option has been selected
 
-                                  if(currentblank==_prevblank)
+                                  bool _allFlagsFilled=true;
+                                  for(int i=0;i<blanks.length;i++){
+                                    if(blanks[i][2]==-1){
+                                      _allFlagsFilled=false;
+                                      break;
+                                    }
+                                  }
+                                  if(_allFlagsFilled==true)
                                     allBlanksFilled=true;
+                                  // if(currentblank==_prevblank)
+                                  //   allBlanksFilled=true;
 
                                   setState(() {
 
@@ -247,7 +323,12 @@ class _BasicQuestion2State extends State<BasicQuestion2> {
                   height: 50,
                   width: (MediaQuery. of(context). size. width-60)/2,
                   child: RaisedButton(
-                    onPressed: (){},
+                    onPressed: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Question2Theory()),
+                      );
+                    },
                     color: Colors.blueAccent,
                     textColor: Colors.white,
                     child: Text(
